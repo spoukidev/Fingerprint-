@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BioMatch | Démo Interactive</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="background-blobs">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+    </div>
+
+    <div class="container">
+        <header>
+            <div class="logo">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12C2 17.5228 6.47715 22 12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12Z"/><path d="M12 2C6.47715 2 2 6.47715 2 12"/><path d="M22 12C22 17.5228 17.5228 22 12 22"/><path d="M12 2C17.5228 2 22 6.47715 22 12"/><path d="M2 12C2 6.47715 6.47715 2 12 2"/><path d="M12 22C6.47715 22 2 17.5228 2 12"/><path d="M12 22C17.5228 22 22 17.5228 22 12"/></svg>
+                <h1>BioMatch Pro</h1>
+            </div>
+            <p>Simulateur Interactif de Reconnaissance Biométrique</p>
+        </header>
+
+        <div class="layout">
+            <!-- Sidebar: Control Panel -->
+            <aside class="control-panel">
+                <h3><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg> Paramètres</h3>
+                
+                <div class="control-group">
+                    <h4>Données Simulées</h4>
+                    <div class="input-wrap">
+                        <label for="n_samples">Nb d'empreintes : <span id="n_samples_val">1000</span></label>
+                        <input type="range" id="n_samples" min="100" max="5000" step="100" value="1000">
+                    </div>
+                    <div class="input-wrap">
+                        <label for="n_classes">Nb d'individus : <span id="n_classes_val">5</span></label>
+                        <input type="range" id="n_classes" min="2" max="20" step="1" value="5">
+                    </div>
+                    <div class="input-wrap">
+                        <label for="noise_level">Niveau de Bruit : <span id="noise_level_val">Faible</span></label>
+                        <input type="range" id="noise_level" min="1" max="3" step="1" value="1">
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <h4>Hyperparamètres</h4>
+                    <div class="input-wrap">
+                        <label for="svm_kernel">Noyau SVM :</label>
+                        <select id="svm_kernel">
+                            <option value="rbf">RBF (Non Linéaire)</option>
+                            <option value="linear">Linear (Linéaire)</option>
+                            <option value="poly">Polynomial</option>
+                        </select>
+                    </div>
+                    <div class="input-wrap">
+                        <label for="rf_trees">Arbres (Random Forest) : <span id="rf_trees_val">100</span></label>
+                        <input type="range" id="rf_trees" min="10" max="300" step="10" value="100">
+                    </div>
+                </div>
+
+                <button id="runBtn" class="btn-primary full-width">
+                    <span class="btn-text">Lancer Simulation</span>
+                    <div class="spinner hidden" id="spinner"></div>
+                </button>
+            </aside>
+
+            <!-- Main Content: Dashboard -->
+            <main class="dashboard hidden" id="dashboard">
+                <!-- SVM Card -->
+                <div class="card" id="card-SVM">
+                    <div class="card-header">
+                        <h2>SVM</h2>
+                        <span class="badge">Support Vector Machine</span>
+                    </div>
+                    <div class="metrics">
+                        <div class="metric">
+                            <span class="label">Accuracy</span>
+                            <span class="value" id="acc-SVM">--%</span>
+                        </div>
+                        <div class="metric">
+                            <span class="label">Precision</span>
+                            <span class="value" id="prec-SVM">--%</span>
+                        </div>
+                        <div class="metric">
+                            <span class="label">Recall</span>
+                            <span class="value" id="rec-SVM">--%</span>
+                        </div>
+                        <div class="metric">
+                            <span class="label">F1-Score</span>
+                            <span class="value" id="f1-SVM">--%</span>
+                        </div>
+                        <div class="metric">
+                            <span class="label">Temps</span>
+                            <span class="value" id="time-SVM">-- s</span>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <img id="cm-SVM" src="" alt="Confusion Matrix SVM">
+                    </div>
+                </div>
+
+                <!-- Random Forest Card -->
+                <div class="card" id="card-RandomForest">
+                    <div class="card-header">
+                        <h2>Random Forest</h2>
+                        <span class="badge">Arbres de Décision</span>
+                    </div>
+                    <div class="metrics">
+                        <div class="metric">
+                            <span class="label">Accuracy</span>
+                            <span class="value" id="acc-RandomForest">--%</span>
+                        </div>
+                        <div class="metric">
+                            <span class="label">Precision</span>
+                            <span class="value" id="prec-RandomForest">--%</span>
+                        </div>
+                        <div class="metric">
+                            <span class="label">Recall</span>
+                            <span class="value" id="rec-RandomForest">--%</span>
+                        </div>
+                        <div class="metric">
+                            <span class="label">F1-Score</span>
+                            <span class="value" id="f1-RandomForest">--%</span>
+                        </div>
+                        <div class="metric">
+                            <span class="label">Temps</span>
+                            <span class="value" id="time-RandomForest">-- s</span>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <img id="cm-RandomForest" src="" alt="Confusion Matrix Random Forest">
+                    </div>
+                </div>
+
+                <!-- MLP Card -->
+                <div class="card" id="card-MLP">
+                    <div class="card-header">
+                        <h2>MLP</h2>
+                        <span class="badge">Réseau de Neurones</span>
+                    </div>
+                    <div class="metrics">
+                        <div class="metric">
+                            <span class="label">Accuracy</span>
+                            <span class="value" id="acc-MLP">--%</span>
+                        </div>
+                        <div class="metric">
+                            <span class="label">Precision</span>
+                            <span class="value" id="prec-MLP">--%</span>
+                        </div>
+                        <div class="metric">
+                            <span class="label">Recall</span>
+                            <span class="value" id="rec-MLP">--%</span>
+                        </div>
+                        <div class="metric">
+                            <span class="label">F1-Score</span>
+                            <span class="value" id="f1-MLP">--%</span>
+                        </div>
+                        <div class="metric">
+                            <span class="label">Temps</span>
+                            <span class="value" id="time-MLP">-- s</span>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <img id="cm-MLP" src="" alt="Confusion Matrix MLP">
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
