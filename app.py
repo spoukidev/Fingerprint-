@@ -17,6 +17,29 @@ import base64
 
 app = Flask(__name__)
 
+LIMITS = {
+    'n_samples': (100, 10000),
+    'n_classes': (2, 20),
+    'noise_level': (1, 3),
+    'rf_trees': (10, 1000),
+}
+ALLOWED_SVM_KERNELS = {'linear', 'poly', 'rbf', 'sigmoid'}
+
+
+def parse_bounded_int(data, key, default):
+    value = data.get(key, default)
+    if isinstance(value, bool):
+        raise ValueError(f'{key} must be an integer')
+    try:
+        value = int(value)
+    except (TypeError, ValueError):
+        raise ValueError(f'{key} must be an integer') from None
+    low, high = LIMITS[key]
+    if not low <= value <= high:
+        raise ValueError(f'{key} must be between {low} and {high}')
+    return value
+
+
 def load_fingerprint_data(n_samples=1000, n_classes=5, noise_level=1):
     # noise_level: 1 (Faible), 2 (Moyen), 3 (Élevé)
     n_features = 50
@@ -43,13 +66,21 @@ def index():
 
 @app.route('/api/run-simulation', methods=['POST'])
 def run_simulation():
-    data = request.json or {}
-    
-    n_samples = int(data.get('n_samples', 1000))
-    n_classes = int(data.get('n_classes', 5))
-    noise_level = int(data.get('noise_level', 1))
+    data = request.get_json(silent=True)
+    if not isinstance(data, dict):
+        return jsonify({'error': 'Request body must be a JSON object'}), 400
+
+    try:
+        n_samples = parse_bounded_int(data, 'n_samples', 1000)
+        n_classes = parse_bounded_int(data, 'n_classes', 5)
+        noise_level = parse_bounded_int(data, 'noise_level', 1)
+        rf_trees = parse_bounded_int(data, 'rf_trees', 100)
+    except ValueError as exc:
+        return jsonify({'error': str(exc)}), 400
+
     svm_kernel = data.get('svm_kernel', 'rbf')
-    rf_trees = int(data.get('rf_trees', 100))
+    if svm_kernel not in ALLOWED_SVM_KERNELS:
+        return jsonify({'error': 'svm_kernel must be one of: linear, poly, rbf, sigmoid'}), 400
     
     # 1. Chargement des données
     X, y = load_fingerprint_data(n_samples=n_samples, n_classes=n_classes, noise_level=noise_level)
