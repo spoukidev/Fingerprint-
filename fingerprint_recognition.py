@@ -55,8 +55,16 @@ def main():
     # 1. Chargement des données
     X, y = load_fingerprint_data()
     
-    # 2. Séparation en données d'entraînement (80%) et de test (20%)
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    # 2. Séparation en données d'entraînement (80%) et de test (20%).
+    # La stratification conserve la proportion de chaque identité dans les deux ensembles,
+    # ce qui rend la comparaison des modèles plus stable et reproductible.
+    X_train, X_test, y_train, y_test = train_test_split(
+        X,
+        y,
+        test_size=0.2,
+        random_state=42,
+        stratify=y,
+    )
     
     # 3. Normalisation (Très important pour le SVM et le MLP)
     # Met les données à la même échelle (moyenne = 0, écart-type = 1)
