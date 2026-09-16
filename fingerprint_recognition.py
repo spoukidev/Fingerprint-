@@ -7,7 +7,13 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVC
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.neural_network import MLPClassifier
-from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+from sklearn.metrics import (
+    accuracy_score,
+    balanced_accuracy_score,
+    classification_report,
+    confusion_matrix,
+    f1_score,
+)
 import time
 
 def load_fingerprint_data():
@@ -101,12 +107,17 @@ def main():
         y_pred = model.predict(X_test_scaled)
         predictions[name] = y_pred
         
-        # Calcul des performances
+        # Plusieurs métriques sont rapportées : l'accuracy seule peut masquer de
+        # mauvaises performances sur une identité minoritaire dans un jeu réel.
         acc = accuracy_score(y_test, y_pred)
+        balanced_acc = balanced_accuracy_score(y_test, y_pred)
+        macro_f1 = f1_score(y_test, y_pred, average='macro')
         print(f"[{name}] Précision (Accuracy) : {acc*100:.2f}%")
+        print(f"[{name}] Balanced Accuracy : {balanced_acc*100:.2f}%")
+        print(f"[{name}] F1 macro : {macro_f1:.4f}")
         print(f"[{name}] Temps d'entraînement : {train_time:.4f} secondes")
         print(f"[{name}] Rapport de classification :")
-        print(classification_report(y_test, y_pred))
+        print(classification_report(y_test, y_pred, zero_division=0))
         print("-" * 50)
         
     # 6. Visualisation
