@@ -1,4 +1,5 @@
 from flask import Flask, render_template, jsonify, request
+import os
 import numpy as np
 import matplotlib
 matplotlib.use('Agg') # Pour éviter les erreurs d'interface graphique
@@ -141,4 +142,7 @@ def run_simulation():
     return jsonify(results)
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    # Keep the debugger off unless it is explicitly requested. The Flask
+    # debugger is unsafe to expose on a reachable interface.
+    debug = os.environ.get('FLASK_DEBUG', '').lower() in {'1', 'true', 'yes'}
+    app.run(debug=debug, port=5000)
