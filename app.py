@@ -114,18 +114,19 @@ def run_simulation():
         
         # Matrice de confusion en Base64
         cm = confusion_matrix(y_test, y_pred)
-        fig, ax = plt.subplots(figsize=(4, 3))
-        # Style sombre
-        plt.style.use('dark_background')
-        sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', ax=ax, cbar=False)
-        ax.set_title(f'Matrice de Confusion', color='white')
-        ax.set_xlabel('Prédictions', color='white')
-        ax.set_ylabel('Réelles', color='white')
-        
-        plt.tight_layout()
-        
-        buf = io.BytesIO()
-        plt.savefig(buf, format='png', transparent=True)
+        # Style sombre, appliqué localement : plt.style.use() modifiait l'état
+        # global après la création de la figure, donc la première matrice
+        # (SVM) de la première requête n'était pas stylée.
+        with plt.style.context('dark_background'):
+            fig, ax = plt.subplots(figsize=(4, 3))
+            sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', ax=ax, cbar=False)
+            ax.set_title('Matrice de Confusion', color='white')
+            ax.set_xlabel('Prédictions', color='white')
+            ax.set_ylabel('Réelles', color='white')
+            fig.tight_layout()
+
+            buf = io.BytesIO()
+            fig.savefig(buf, format='png', transparent=True)
         buf.seek(0)
         img_base64 = base64.b64encode(buf.read()).decode('utf-8')
         plt.close(fig)
