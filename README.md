@@ -1,5 +1,6 @@
 # BioMatch Pro — Biometric Fingerprint ML Experiment
 
+[![CI](https://github.com/spoukidev/biomatch-fingerprint-ml/actions/workflows/ci.yml/badge.svg)](https://github.com/spoukidev/biomatch-fingerprint-ml/actions/workflows/ci.yml)
 [![Python](https://img.shields.io/badge/Python-3.8%2B-blue.svg)](https://www.python.org/)
 [![Flask](https://img.shields.io/badge/Flask-2.0%2B-green.svg)](https://flask.palletsprojects.com/)
 [![Scikit-Learn](https://img.shields.io/badge/scikit--learn-1.0%2B-orange.svg)](https://scikit-learn.org/)
@@ -34,8 +35,8 @@ The project compares three classifiers:
 ## Installation
 
 ```bash
-git clone https://github.com/spoukidev/Fingerprint-.git
-cd Fingerprint-
+git clone https://github.com/spoukidev/biomatch-fingerprint-ml.git
+cd biomatch-fingerprint-ml
 python -m venv venv
 ```
 
